@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: incognito-staging
+  labels:
+    name: incognito-staging
+    environment: staging
+    project: incognito-technology
