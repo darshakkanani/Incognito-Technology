@@ -1,0 +1,191 @@
+Incognito-Technology/
+│── README.md                        # Project overview
+│── LICENSE                          # License file
+│── .gitignore                       # Ignore unnecessary files
+│── .dockerignore                    # Ignore files in Docker builds
+│── .env.example                     # Environment variable template
+│── Makefile                         # Automation commands
+│── docker-compose.yml               # Multi-container orchestration (local)
+│── package.json                     # Root config (if Node used globally)
+│── tsconfig.json                    # Typescript global config
+│
+├── docs/                            # Documentation hub
+│   ├── ARCHITECTURE.md
+│   ├── SDLC_MODEL.md
+│   ├── TEAM_RESPONSIBILITIES.md
+│   ├── SECURITY_COMPLIANCE.md
+│   ├── DEPLOYMENT_GUIDE.md
+│   ├── API_REFERENCE.md
+│   ├── BUSINESS_PLAN.md
+│   └── ROADMAP.md
+│
+├── frontend/                        # User-facing app
+│   ├── package.json
+│   ├── next.config.js
+│   ├── tailwind.config.js
+│   ├── jest.config.js               # Frontend testing
+│   ├── cypress/                     # E2E tests
+│   │   ├── integration/
+│   │   ├── fixtures/
+│   │   └── support/
+│   ├── public/
+│   │   ├── favicon.ico
+│   │   └── logo.svg
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── index.tsx
+│   │   │   ├── login.tsx
+│   │   │   ├── register.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   ├── doctor.tsx
+│   │   │   │   ├── patient.tsx
+│   │   │   │   └── admin.tsx
+│   │   ├── components/
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── Card.tsx
+│   │   │   └── Charts.tsx
+│   │   ├── contexts/                 # React contexts
+│   │   ├── hooks/                    # Custom React hooks
+│   │   ├── utils/
+│   │   ├── services/                 # API calls
+│   │   └── styles/
+│   └── tests/
+│       ├── unit/
+│       └── integration/
+│
+├── backend/                         # Backend APIs
+│   ├── fastapi_app/                 # Python services
+│   │   ├── main.py
+│   │   ├── requirements.txt
+│   │   ├── routers/
+│   │   │   ├── auth.py
+│   │   │   ├── ehr.py
+│   │   │   ├── ai_inference.py
+│   │   │   └── blockchain.py
+│   │   ├── models/
+│   │   │   ├── user.py
+│   │   │   ├── ehr.py
+│   │   │   └── blockchain.py
+│   │   ├── schemas/
+│   │   ├── core/
+│   │   │   ├── config.py
+│   │   │   ├── security.py
+│   │   │   └── logging.py
+│   │   ├── services/
+│   │   │   ├── ai_service.py
+│   │   │   ├── blockchain_service.py
+│   │   │   └── notification_service.py
+│   │   ├── utils/
+│   │   └── tests/
+│   │       ├── test_auth.py
+│   │       ├── test_ehr.py
+│   │       └── test_ai.py
+│   │
+│   ├── node_services/               # Node.js microservices
+│   │   ├── auth-service/
+│   │   │   ├── src/
+│   │   │   │   ├── index.js
+│   │   │   │   ├── routes/
+│   │   │   │   ├── controllers/
+│   │   │   │   ├── middlewares/
+│   │   │   │   └── utils/
+│   │   │   ├── tests/
+│   │   │   └── package.json
+│   │   └── notification-service/
+│   │       ├── src/
+│   │       │   ├── index.js
+│   │       │   ├── socket.js
+│   │       │   └── events/
+│   │       ├── tests/
+│   │       └── package.json
+│   └── tests/
+│
+├── database/                        # DB setup
+│   ├── migrations/
+│   ├── seed_data/
+│   ├── schemas/
+│   │   ├── ehr_schema.sql
+│   │   ├── users_schema.sql
+│   │   └── logs_schema.sql
+│   ├── db_config.yaml
+│   └── monitoring/
+│       ├── backups/
+│       └── replication_logs/
+│
+├── ai_ml/                           # AI models
+│   ├── notebooks/
+│   │   ├── research.ipynb
+│   │   └── experiments.ipynb
+│   ├── datasets/
+│   ├── models/
+│   │   ├── federated_model.h5
+│   │   └── cnn_model.pth
+│   ├── src/
+│   │   ├── train.py
+│   │   ├── inference.py
+│   │   ├── federated_learning.py
+│   │   ├── adversarial_defense.py
+│   │   └── preprocessing.py
+│   ├── utils/
+│   │   └── metrics.py
+│   └── tests/
+│       ├── test_train.py
+│       └── test_inference.py
+│
+├── blockchain/                      # Blockchain code
+│   ├── smart_contracts/
+│   │   ├── ehrContract.sol          # Ethereum contract
+│   │   └── chaincode/               # Hyperledger Fabric
+│   │       └── ehr_chaincode.go
+│   ├── client/
+│   │   ├── python_client.py
+│   │   └── node_client.js
+│   ├── migrations/
+│   └── tests/
+│
+├── security/                        # Security layer
+│   ├── pentest_reports/
+│   ├── threat_models/
+│   ├── compliance/
+│   │   ├── GDPR.md
+│   │   ├── HIPAA.md
+│   │   └── ISO27001.md
+│   ├── ids_ips_rules/
+│   ├── waf_config/
+│   └── incident_response/
+│       ├── playbooks/
+│       └── logs/
+│
+├── devops/                          # DevOps CI/CD
+│   ├── ci_cd/
+│   │   ├── github-actions.yml
+│   │   ├── jenkinsfile
+│   │   ├── sonarcloud.yml
+│   │   └── trivy-scan.yml
+│   ├── docker/
+│   │   ├── Dockerfile.frontend
+│   │   ├── Dockerfile.backend
+│   │   ├── Dockerfile.ai
+│   │   └── Dockerfile.blockchain
+│   ├── k8s/
+│   │   ├── frontend-deployment.yaml
+│   │   ├── backend-deployment.yaml
+│   │   ├── ai-deployment.yaml
+│   │   ├── blockchain-deployment.yaml
+│   │   ├── monitoring-deployment.yaml
+│   │   └── ingress.yaml
+│   ├── monitoring/
+│   │   ├── prometheus.yml
+│   │   ├── grafana_dashboards/
+│   │   └── alerts.yml
+│   └── logging/
+│       ├── elk_config/
+│       └── fluentd.conf
+│
+└── tests/                           # End-to-end & integration tests
+    ├── e2e_frontend.test.js
+    ├── e2e_backend.test.py
+    ├── e2e_blockchain.test.js
+    └── e2e_ai.test.py

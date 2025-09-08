@@ -5,25 +5,26 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: ../devops/docker/Dockerfile.frontend
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:8000
       - NEXT_PUBLIC_BLOCKCHAIN_URL=http://localhost:8545
+      - NEXT_PUBLIC_AI_API_URL=http://localhost:8002
     volumes:
       - ./frontend:/app
       - /app/node_modules
     depends_on:
-      - fastapi-service
-      - nodejs-service
+      - fastapi-backend
+      - nodejs-auth
 
   # FastAPI Backend Service
-  fastapi-service:
+  fastapi-backend:
     build:
-      context: ./backend/fastapi-service
-      dockerfile: Dockerfile
+      context: ./backend/fastapi_app
+      dockerfile: ../../devops/docker/Dockerfile.backend
     ports:
       - "8000:8000"
     environment:
@@ -33,63 +34,65 @@ services:
       - JWT_SECRET=your-super-secret-jwt-key
       - BLOCKCHAIN_URL=http://blockchain-node:8545
     volumes:
-      - ./backend/fastapi-service:/app
+      - ./backend/fastapi_app:/app
     depends_on:
       - postgres
       - mongo
       - redis
 
-  # Node.js Backend Service
-  nodejs-service:
+  # Node.js Auth Service
+  nodejs-auth:
     build:
-      context: ./backend/nodejs-service
-      dockerfile: Dockerfile
+      context: ./backend/node_services/auth-service
+      dockerfile: ../../../devops/docker/Dockerfile.backend
     ports:
       - "8001:8001"
     environment:
       - DATABASE_URL=postgresql://postgres:password@postgres:5432/incognito_db
-      - MONGODB_URL=mongodb://mongo:27017/incognito_logs
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=your-super-secret-jwt-key
     volumes:
-      - ./backend/nodejs-service:/app
+      - ./backend/node_services/auth-service:/app
       - /app/node_modules
     depends_on:
       - postgres
-      - mongo
+      - redis
+
+  # Node.js Notification Service
+  nodejs-notifications:
+    build:
+      context: ./backend/node_services/notification-service
+      dockerfile: ../../../devops/docker/Dockerfile.backend
+    ports:
+      - "8002:8002"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./backend/node_services/notification-service:/app
+      - /app/node_modules
+    depends_on:
       - redis
 
   # AI/ML Service
   ai-ml-service:
     build:
-      context: ./ai-ml
-      dockerfile: Dockerfile
+      context: ./ai_ml
+      dockerfile: ../devops/docker/Dockerfile.ai
     ports:
-      - "8002:8002"
+      - "8003:8003"
     environment:
       - MODEL_PATH=/app/models
-      - TENSORFLOW_SERVING_URL=http://tensorflow-serving:8501
     volumes:
-      - ./ai-ml:/app
-      - ./ai-ml/models:/app/models
+      - ./ai_ml:/app
+      - ./ai_ml/models:/app/models
     depends_on:
-      - tensorflow-serving
+      - postgres
 
-  # TensorFlow Serving
-  tensorflow-serving:
-    image: tensorflow/serving:latest
-    ports:
-      - "8501:8501"
-    volumes:
-      - ./ai-ml/models:/models
-    environment:
-      - MODEL_NAME=threat_detection_model
-
-  # Blockchain Node (Hyperledger Fabric)
+  # Blockchain Node
   blockchain-node:
     build:
       context: ./blockchain
-      dockerfile: Dockerfile
+      dockerfile: ../devops/docker/Dockerfile.blockchain
     ports:
       - "8545:8545"
       - "8546:8546"
@@ -111,7 +114,9 @@ services:
       - POSTGRES_PASSWORD=password
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/schemas/users_schema.sql:/docker-entrypoint-initdb.d/01-users.sql
+      - ./database/schemas/ehr_schema.sql:/docker-entrypoint-initdb.d/02-ehr.sql
+      - ./database/schemas/logs_schema.sql:/docker-entrypoint-initdb.d/03-logs.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 30s
@@ -129,7 +134,6 @@ services:
       - MONGO_INITDB_DATABASE=incognito_logs
     volumes:
       - mongo_data:/data/db
-      - ./database/mongodb/init.js:/docker-entrypoint-initdb.d/init.js
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 30s
@@ -149,20 +153,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./devops/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./devops/nginx/ssl:/etc/nginx/ssl
-    depends_on:
-      - frontend
-      - fastapi-service
-      - nodejs-service
 
   # Prometheus Monitoring
   prometheus:
@@ -187,39 +177,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./devops/monitoring/grafana:/etc/grafana/provisioning
-
-  # ELK Stack - Elasticsearch
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-    ports:
-      - "9200:9200"
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-
-  # ELK Stack - Logstash
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.11.0
-    ports:
-      - "5044:5044"
-    volumes:
-      - ./devops/logging/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-    depends_on:
-      - elasticsearch
-
-  # ELK Stack - Kibana
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.11.0
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    depends_on:
-      - elasticsearch
+      - ./devops/monitoring/grafana_dashboards:/etc/grafana/provisioning
 
 volumes:
   postgres_data:
@@ -228,7 +186,6 @@ volumes:
   blockchain_data:
   prometheus_data:
   grafana_data:
-  elasticsearch_data:
 
 networks:
   default:
